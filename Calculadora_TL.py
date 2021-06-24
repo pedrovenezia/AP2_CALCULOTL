@@ -14,10 +14,7 @@ class Calculadora_TL():
         # Constantes
         self.c = 343     # Velocidad del sonido en el aire
         self.rho_0 = 1.18    # Densidad del aire
-        if self.data_path:
-            self.load_data()  
-        else:
-            print('no data_path defined')
+        self.load_data()  
         self.t = t
         self.l1 = l1
         self.l2 = l2
@@ -27,7 +24,7 @@ class Calculadora_TL():
 
     def load_data(self):
         '''Carga de datos'''
-        excel = pd.read_excel(self.data_path, header=None).drop(columns = [0, 1])[1::] #slide indexing 
+        excel = pd.read_excel('/content/TABLA MATERIALES TP1.xlsx', header=None).drop(columns = [0, 1])[1::] #slide indexing 
         new_header = ['material', 'rho', 'E', 'nint', 'sigma']
         excel = excel[1:].reset_index(drop=True) #take the data less the header row
         excel.columns = new_header #set the header row as the df header
@@ -51,27 +48,6 @@ class Calculadora_TL():
                 R[i] = 20*np.log10(m*self.f[i]) - 10*np.log10(np.pi / (4*n)) - 10*np.log10(fc/(self.f[i]-fc)) - 47               
         return R
 
-    def ley_masa2(self, m, nint, fc, fd):     
-        f1 = np.array([])
-        f2 = f1
-        f3 = f1      
-        for i in range(len(self.f)):
-                if self.f[i] < fc:
-                    f1 = np.append(f1, self.f[i])
-                elif (self.f[i] > fc) and (self.f[i] < fd):
-                    f2 = np.append(f2, self.f[i])
-                else:
-                    f3 = np.append(f3, self.f[i])      
-        R1 = 20*np.log10(m*f1) - 47
-        R3 = 20*np.log10(m*f3) - 47
-        n = nint + m / (485 * np.sqrt(f2))    # Factor de pérdidas total
-        a = 10*np.log10(np.pi / (4*n))
-        b = 10*np.log10(fc/(f2-fc))
-        R2 = 20*np.log10(m*f2) - a - b - 47              
-        R = np.append(R1, R2)
-        R = np.append(R, R3)    
-        return R
-
 # SHARP 
     def sharp(self,m,nint,fc):
         R = np.zeros(len(self.f))    
@@ -90,51 +66,59 @@ class Calculadora_TL():
                 R[i] =(((self.f[i]-0.5*fc)/(fc-0.5*fc))*(Rx-Ry))+Ry;           
         return R
 
-    def ISO(self, l1,l2, fc, m, nint):
-        n = nint + m / (485*np.sqrt(self.f)) # Factor de pérdidas total   
-        # Factor de radiación de ondas forzadas
-        k = 2*np.pi*self.f / self.c   # Nro de onda
+# ISO 12354-1 OK!!!!
+    def ISO(self,l1,l2, fc, m, nint):
+        c = 343
+        rho_0 = 1.18
+        n = nint + m / (485*np.sqrt(self.f)) # Factor de pérdidas total
+  # Factor de radiación de ondas forzadas
+        k = 2*np.pi*self.f / c   # Nro de onda
         h = 5*l2/(2*np.pi*l1) - 1/(4*np.pi*l1*l2*k**2)
-        A = -0.964 - (0.5 + l2/(np.pi*l1))* np.log(l2/l1) + h      
+        A = -0.964 - (0.5 + l2/(np.pi*l1))* np.log(l2/l1) + h
         sigma_f = 0.5*(np.log(k*np.sqrt(l1*l2)) - A)
         for i in range(len(sigma_f)):
-            if sigma_f[i] > 2:
-                sigma_f[i] = 2
-        # Factor de radiación de ondas libres
-        sigma_1 = np.sqrt(1-fc/self.f)**(-1)
-        sigma_2 = 4*l1*l2*(self.f/self.c)**2
-        sigma_3 = np.sqrt(2*np.pi*self.f*(l1+l2)/(16*self.c))
-        # Modo de resonancia de placa 1,1
-        f11 = self.c**2/(4*fc)*(1/l1**2 + 1/l2**2)
+          if sigma_f[i] > 2:
+            sigma_f[i] = 2
+    # Factor de radiación de ondas libres
+        sigma_1 = 1/(np.sqrt(1-fc/self.f))
+        sigma_2 = 4*l1*l2*(self.f/c)**2
+        sigma_3 = np.sqrt(2*np.pi*self.f*(l1+l2)/(16*c))
+    # Modo de resonancia de placa 1,1
+        f11 = c**2/(4*fc)*(1/l1**2 + 1/l2**2)
         tau =np.zeros(len(self.f))
-        for i in range(len(self.f)):        
-            if f11 <= 0.5*fc:            
-                if self.f[i] >= fc:
-                    sigma = sigma_1[i]
-                    tau[i] = (2*self.rho_0*self.c/(2*np.pi*self.f[i]*m))**2 * np.pi*fc*sigma**2/(2*self.f[i]*n[i])
-                if self.f[i] < fc:
-                    lamda = np.sqrt(self.f[i]/fc)                   
-                    if self.f[i] > 0.5*fc:
-                        d2 = 0
-                    else:
-                        d2 = 8*self.c**2*(1-2*lamda**2) / (fc**2*np.pi**4*l1*l2*lamda*np.sqrt(1-lamda**2))                
-                    d1 = (1-lamda**2)*np.log((1+lamda)/(1-lamda))+ 2*lamda / (4*np.pi**2*(1-lamda**2)**1.5)
-                    sigma = 2*(l1+l2)*self.c*d1/(l1*l2*fc)+d2                   
-                    if (self.f[i] < f11) and (sigma > sigma_2[i]):
-                        sigma = sigma_2[i]                   
-                    if sigma > 2: sigma = 2                   
-                    tau[i] = (2*self.rho_0*self.c/(2*np.pi*self.f[i]*m))**2 * (2*sigma_f[i] + (l1+l2)**2*np.sqrt(fc/self.f[i])*sigma**2/((l1**2+l2**2)*n[i]))               
-            else:
-                if (self.f[i] < fc) and (sigma_2[i] < sigma_3[i]):
-                    sigma = sigma_2[i]
-                    if sigma > 2: sigma = 2
-                    tau[i] = (2*self.rho_0*self.c/(2*np.pi*self.f[i]*m))**2 * (2*sigma_f[i] + (l1+l2)**2*np.sqrt(fc/self.f[i])*sigma**2/((l1**2+l2**2)*n[i]))
-                if (self.f[i] >= fc) and (sigma_1[i] < sigma_3[i]):
-                    sigma = sigma_1[i]
-                    if sigma > 2: sigma = 2
-                    tau[i] = (2*self.rho_0*self.c/(2*np.pi*self.f[i]*m))**2 * np.pi*fc*sigma**2/(2*self.f[i]*n[i])
+        if f11 <= 0.5*fc:
+          for i in range(len(self.f)):
+            if self.f[i] >= fc:
+              sigma = sigma_1[i]
+              if sigma > 2: sigma = 2
+              tau[i] = (2*rho_0*c/(2*np.pi*self.f[i]*m))**2 * np.pi*fc*sigma**2/(2*self.f[i]*n[i])
+            if self.f[i] < fc:
+              lamda = np.sqrt(self.f[i]/fc)
+              if self.f[i] > 0.5*fc:
+                d2 = 0
+              else:
+                d2 = 8*c**2*(1-2*lamda**2) / (fc**2*np.pi**4*l1*l2*lamda*np.sqrt(1-lamda**2))
+              d1 = ((1-lamda**2)*np.log((1+lamda)/(1-lamda))+ 2*lamda) / (4*np.pi**2*(1-lamda**2)**1.5)
+              sigma = 2*(l1+l2)*c*d1/(l1*l2*fc)+d2
+              if (self.f[i] < f11) and (self.f[i] < 0.5*fc) and (sigma > sigma_2[i]):
+                sigma = sigma_2[i]
+              if sigma > 2: 
+                sigma = 2
+              tau[i] = (2*rho_0*c/(2*np.pi*self.f[i]*m))**2 * (2*sigma_f[i] + (l1+l2)**2*np.sqrt(fc/self.f[i])*sigma**2/((l1**2+l2**2)*n[i])) 
+        else:
+          for i in range(len(self.f)):
+            sigma = sigma_3[i]
+            if (self.f[i] < fc) and (sigma_2[i] < sigma):
+              sigma = sigma_2[i]
+              if sigma > 2: sigma = 2
+              tau[i] = (2*rho_0*c/(2*np.pi*self.f[i]*m))**2 * (2*sigma_f[i] + (l1+l2)**2*np.sqrt(fc/self.f[i])*sigma**2/((l1**2+l2**2)*n[i]))
+            if (self.f[i] >= fc) and (sigma_1[i] < sigma):
+              sigma = sigma_1[i]
+              if sigma > 2: sigma = 2
+              tau[i] = (2*rho_0*c/(2*np.pi*self.f[i]*m))**2 * np.pi*fc*sigma**2/(2*self.f[i]*n[i])
         R = -10*np.log10(tau)
         return R
+
 
             ###DAVY (ok)
     def davy(self,fc,m,nint,rho,E,sigma):
@@ -142,7 +126,7 @@ class Calculadora_TL():
         dB = 0.236
         octave = 3
         R = np.zeros(len(self.f))
-        Avsingle_leaf = 0
+        #Avsingle_leaf = 0
         for i in range(len(self.f)):
             n = nint + (m/(485*np.sqrt(self.f[i])))
             ratio = self.f[i]/fc
@@ -151,11 +135,11 @@ class Calculadora_TL():
                 TLost = self.Single_leaf_Davy(self.f[i],rho,E,sigma,self.t,n,self.l2,self.l1)
             else:
                 Avsingle_leaf = 0
-            for j in range(1,averages+1):
-                factor = 2**((2*j-1-averages)/(2*averages*octave))
-                aux = 10**(-self.Single_leaf_Davy(self.f[i]*factor,rho,E,sigma,self.t,n,self.l2,self.l1)/10)
-                Avsingle_leaf += aux
-            TLost = -10*np.log10(Avsingle_leaf/averages)
+                for j in range(1,averages+1):
+                  factor = 2**((2*j-1-averages)/(2*averages*octave))
+                  aux = 10**(-self.Single_leaf_Davy(self.f[i]*factor,rho,E,sigma,self.t,n,self.l2,self.l1)/10)
+                  Avsingle_leaf += aux
+                TLost = -10*np.log10(Avsingle_leaf/averages)
             R[i] = TLost
         return R
 
@@ -274,11 +258,3 @@ class Calculadora_TL():
                 funcion = self._llama_metodo(x)
                 results[x] = funcion(fc, m, nint, rho, E, sigma)
         return results 
-
-
-
-                
-            
-
-
-

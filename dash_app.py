@@ -14,7 +14,8 @@ data = calculadora_tl.data
 available_indicators = data.material.unique()
 
 app.layout = html.Div([
-html.H1("Calculadora de TL"),
+html.H1("Aislamiento de una pared monolítica", style={
+  'font-family': 'verdana', 'width':'75%', 'margin':50}),
     html.Div([
 
         html.Div([
@@ -25,7 +26,7 @@ html.H1("Calculadora de TL"),
                 value='Acero'
             ),
             html.Div([
-                html.P(id = 'text-dimensiones',children = 'Dimensiones'),
+                html.P(id = 'text-dimensiones',children = 'Dimensiones (m)'),
                 dcc.Input(
                     id='largo',
                     placeholder='Largo',
@@ -39,7 +40,7 @@ html.H1("Calculadora de TL"),
                     value='Alto'),
                 dcc.Input(
                     id='espesor',
-                    placeholder='Ancho',
+                    placeholder='Espesor',
                     type='number',
                     value='Ancho')
             ]),      
@@ -51,13 +52,18 @@ html.H1("Calculadora de TL"),
              dcc.Checklist(    
                  id='metodos',          
                 options=[
-                    {'label': 'Primera ley de masa', 'value': 'ley1'},
-                    {'label': 'Sharp', 'value': 'sharp'},
-                    {'label': 'ISO', 'value': 'ISO'},
-                    {'label': 'Davy', 'value': 'davy'}
+                    {'label': 'Pared Simple', 'value': 'ley1'},
+                    {'label': 'Modelo Sharp', 'value': 'sharp'},
+                    {'label': 'ISO 12354-1', 'value': 'ISO'},
+                    {'label': 'Modelo Davy', 'value': 'davy'}
                 ],
                 labelStyle={'display': 'block'},
-                style={'marginBottom': 50, 'marginTop': 25})
+                style={'marginBottom': 150, 'marginTop': 25}),
+            dcc.RadioItems(
+                id='xaxis-type',
+                options=[{'label': i, 'value': i} for i in ['Linear', 'Log']],
+                value='Linear',
+                labelStyle={'display': 'inline-block'})
         ],style={'width': '30%', 'float': 'right', 'display': 'inline-block'}),
     ]),
 
@@ -71,8 +77,9 @@ html.H1("Calculadora de TL"),
     Input('alto', 'value'),
     Input('largo', 'value'),
     Input('espesor', 'value'),
-    Input('metodos', 'value'))
-def update_graph(material,alto,largo,espesor,metodos):
+    Input('metodos', 'value'),
+    Input('xaxis-type', 'value'))
+def update_graph(material,alto,largo,espesor,metodos, xaxis_type):
 
     calculadora_tl = Calculadora_TL(data_path='TABLA MATERIALES TP1.xlsx',
                                     t=espesor,
@@ -83,9 +90,10 @@ def update_graph(material,alto,largo,espesor,metodos):
     resultados_df = pd.DataFrame(resultados)
     fig = go.Figure()
     # Edit the layout
-    fig.update_layout(title='R calculados para diferentes metodos',
-                   xaxis_title='Frecuencias (Hz)',
-                   yaxis_title='Nivel (dB)')
+    fig.update_layout(title='Aislamiento a ruido aéreo según distintos métodos',
+                   xaxis_title='Frecuencia (Hz)',
+                   yaxis_title='R (dB)')
+    fig.update_xaxes(type='linear' if xaxis_type == 'Linear' else 'log')
     for i, x in enumerate(metodos):
         fig.add_traces(go.Scatter(x=resultados['frecuencia'], y = resultados[x],
                                   mode = 'lines+markers', line=dict(color=colors[i]),
