@@ -9,7 +9,7 @@ from Calculadora_TL import Calculadora_TL
 
 app = dash.Dash(__name__)
 server = app.server
-calculadora_tl = Calculadora_TL('/content/TABLA MATERIALES TP1.xlsx')
+calculadora_tl = Calculadora_TL('TABLA MATERIALES TP1.xlsx')
 data = calculadora_tl.data
 available_indicators = data.material.unique()
 
@@ -74,7 +74,7 @@ html.H1("Calculadora de TL"),
     Input('metodos', 'value'))
 def update_graph(material,alto,largo,espesor,metodos):
 
-    calculadora_tl = Calculadora_TL(data_path='/content/TABLA MATERIALES TP1.xlsx',
+    calculadora_tl = Calculadora_TL(data_path='TABLA MATERIALES TP1.xlsx',
                                     t=espesor,
                                     l1=largo, l2=alto)
     resultados = calculadora_tl.calcular_r(material, metodos)
@@ -103,7 +103,7 @@ def update_graph(material,alto,largo,espesor,metodos):
     Input('metodos', 'value'),
     prevent_initial_call=True,)
 def download_func(boton_exportar, material, alto, largo, espesor, metodos):
-    calculadora_tl = Calculadora_TL(data_path='/content/TABLA MATERIALES TP1.xlsx',
+    calculadora_tl = Calculadora_TL(data_path='TABLA MATERIALES TP1.xlsx',
                                     t=espesor,
                                     l1=largo, l2=alto)
     resultados = calculadora_tl.calcular_r(material, metodos)
