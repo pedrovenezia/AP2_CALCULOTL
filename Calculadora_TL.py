@@ -14,7 +14,10 @@ class Calculadora_TL():
         # Constantes
         self.c = 343     # Velocidad del sonido en el aire
         self.rho_0 = 1.18    # Densidad del aire
-        self.load_data()  
+        if self.data_path:
+            self.load_data()  
+        else:
+            print('no data_path defined')
         self.t = t
         self.l1 = l1
         self.l2 = l2
@@ -24,7 +27,7 @@ class Calculadora_TL():
 
     def load_data(self):
         '''Carga de datos'''
-        excel = pd.read_excel('/content/TABLA MATERIALES TP1.xlsx', header=None).drop(columns = [0, 1])[1::] #slide indexing 
+        excel = pd.read_excel(self.data_path, header=None).drop(columns = [0, 1])[1::] #slide indexing 
         new_header = ['material', 'rho', 'E', 'nint', 'sigma']
         excel = excel[1:].reset_index(drop=True) #take the data less the header row
         excel.columns = new_header #set the header row as the df header

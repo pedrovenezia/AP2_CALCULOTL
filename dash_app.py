@@ -108,7 +108,6 @@ def download_func(boton_exportar, material, alto, largo, espesor, metodos):
                                     l1=largo, l2=alto)
     resultados = calculadora_tl.calcular_r(material, metodos)
     resultados['frecuencia'] = calculadora_tl.f
-    colors = px.colors.qualitative.Plotly
     resultados_df = pd.DataFrame(resultados)
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     if 'boton_exportar' in changed_id:
