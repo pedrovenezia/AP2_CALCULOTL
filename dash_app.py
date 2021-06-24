@@ -59,11 +59,6 @@ html.H1("Aislamiento de una pared monolítica", style={
                 ],
                 labelStyle={'display': 'block'},
                 style={'marginBottom': 150, 'marginTop': 25}),
-            dcc.RadioItems(
-                id='xaxis-type',
-                options=[{'label': i, 'value': i} for i in ['Linear', 'Log']],
-                value='Linear',
-                labelStyle={'display': 'inline-block'})
         ],style={'width': '30%', 'float': 'right', 'display': 'inline-block'}),
     ]),
 
