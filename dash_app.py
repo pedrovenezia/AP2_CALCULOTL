@@ -14,11 +14,11 @@ data = calculadora_tl.data
 available_indicators = data.material.unique()
 
 app.layout = html.Div([
-    
-    html.Div([html.Img(src=app.get_asset_url('untref.png'), style={'float': 'center','margin': 'auto'}),
+
+    html.Div([html.Img(src=app.get_asset_url('untref.png'), style={'margin': 'auto'}),
               html.H1("Aislamiento de una pared monolítica", style={'float':'right',
-  'font-family': 'verdana', 'width':'50%'})],
-    style={'vertical-align': 'top'}),
+                'font-family': 'verdana', 'width':'50%'})],
+                style={'vertical-align': 'top'}),
 
         html.Div([
             html.P(id = 'text-material',children = 'Material'),
@@ -62,7 +62,6 @@ app.layout = html.Div([
                 labelStyle={'display': 'block'},
                 style={'marginBottom': 150, 'marginTop': 25}),
         ],style={'width': '30%', 'float': 'right', 'display': 'inline-block'}),
-    ]),
 
         dcc.Graph(id='indicator-graphic'),
 
