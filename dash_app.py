@@ -67,8 +67,13 @@ html.H1("Aislamiento de una pared monolítica", style={
         ],style={'width': '30%', 'float': 'right', 'display': 'inline-block'}),
     ]),
 
-    dcc.Graph(id='indicator-graphic')
+        dcc.Graph(id='indicator-graphic'),
 
+        dcc.RadioItems(
+            id='xaxis-type',
+            options=[{'label': i, 'value': i} for i in ['Linear', 'Log']],
+            value='Linear',
+            labelStyle={'display': 'inline-block'})
 ])
 
 @app.callback(
