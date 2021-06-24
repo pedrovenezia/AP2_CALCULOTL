@@ -8,6 +8,7 @@ import pandas as pd
 from Calculadora_TL import Calculadora_TL
 
 app = dash.Dash(__name__)
+server = app.server
 calculadora_tl = Calculadora_TL('/content/TABLA MATERIALES TP1.xlsx')
 data = calculadora_tl.data
 available_indicators = data.material.unique()
