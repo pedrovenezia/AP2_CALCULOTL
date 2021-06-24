@@ -120,7 +120,7 @@ def download_func(boton_exportar, material, alto, largo, espesor, metodos):
     resultados_df = pd.DataFrame(resultados)
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     if 'boton_exportar' in changed_id:
-        return dcc.send_data_frame(resultados_df.to_csv, "resultados.csv")
+        return dcc.send_data_frame(resultados_df.to_excel, "resultados.xlsx", sheet_name="resultados")
 
 if __name__ == '__main__':
     app.run_server(debug=True)
