@@ -55,23 +55,24 @@ class Calculadora_TL():
             if self.f[i]<(0.5*fc): 
                 R[i]= 10*np.log10(1+(((np.pi*m*self.f[i])/(self.rho_0*self.c))**2))-5.5;                       
             elif self.f[i]>=fc:
-                ntotal=(fc)+(m/(485*np.sqrt(self.f[i])))
+                ntotal=(nint)+(m/(485*np.sqrt(self.f[i])))
                 R22 = 10*np.log10(1+(((np.pi*m*self.f[i])/(self.rho_0*self.c))**2))+10*np.log10((2*ntotal*self.f[i])/(np.pi*fc))
                 R21 = (10*np.log10(1+((np.pi*m*self.f[i])/(self.rho_0*self.c))**2))-(5.5)
                 R[i]= min(R21,R22); #Toma el minimo entre R21 y R22            
             elif (0.5*fc)<=self.f[i] and self.f[i]<fc:
-                ntotal = (fc)+(m/(485*np.sqrt(self.f[i]))); 
+                ntotal = (nint)+(m/(485*np.sqrt(self.f[i]))); 
                 Rx = 10*np.log10(1+((np.pi*m*self.f[i])/(self.rho_0*self.c))**2) + 10*np.log10((2*ntotal*self.f[i])/(np.pi*fc))
                 Ry = 10*np.log10(1+((np.pi*m*self.f[i])/(self.rho_0*self.c))**2) - 5.5
                 R[i] =(((self.f[i]-0.5*fc)/(fc-0.5*fc))*(Rx-Ry))+Ry;           
         return R
+
 
 # ISO 12354-1 OK!!!!
     def ISO(self,l1,l2, fc, m, nint):
         c = 343
         rho_0 = 1.18
         n = nint + m / (485*np.sqrt(self.f)) # Factor de pérdidas total
-  # Factor de radiación de ondas forzadas
+        # Factor de radiación de ondas forzadas
         k = 2*np.pi*self.f / c   # Nro de onda
         h = 5*l2/(2*np.pi*l1) - 1/(4*np.pi*l1*l2*k**2)
         A = -0.964 - (0.5 + l2/(np.pi*l1))* np.log(l2/l1) + h
@@ -79,11 +80,11 @@ class Calculadora_TL():
         for i in range(len(sigma_f)):
           if sigma_f[i] > 2:
             sigma_f[i] = 2
-    # Factor de radiación de ondas libres
-        sigma_1 = 1/(np.sqrt(1-fc/self.f))
+        # Factor de radiación de ondas libres
+        sigma_1 = 1/(np.sqrt(abs(1-fc/self.f)))
         sigma_2 = 4*l1*l2*(self.f/c)**2
         sigma_3 = np.sqrt(2*np.pi*self.f*(l1+l2)/(16*c))
-    # Modo de resonancia de placa 1,1
+        # Modo de resonancia de placa 1,1
         f11 = c**2/(4*fc)*(1/l1**2 + 1/l2**2)
         tau =np.zeros(len(self.f))
         if f11 <= 0.5*fc:
@@ -100,10 +101,9 @@ class Calculadora_TL():
                 d2 = 8*c**2*(1-2*lamda**2) / (fc**2*np.pi**4*l1*l2*lamda*np.sqrt(1-lamda**2))
               d1 = ((1-lamda**2)*np.log((1+lamda)/(1-lamda))+ 2*lamda) / (4*np.pi**2*(1-lamda**2)**1.5)
               sigma = 2*(l1+l2)*c*d1/(l1*l2*fc)+d2
-              if (self.f[i] < f11) and (self.f[i] < 0.5*fc) and (sigma > sigma_2[i]):
+              if (self.f[i] < f11) and (sigma > sigma_2[i]):
                 sigma = sigma_2[i]
-              if sigma > 2: 
-                sigma = 2
+              if sigma > 2: sigma = 2
               tau[i] = (2*rho_0*c/(2*np.pi*self.f[i]*m))**2 * (2*sigma_f[i] + (l1+l2)**2*np.sqrt(fc/self.f[i])*sigma**2/((l1**2+l2**2)*n[i])) 
         else:
           for i in range(len(self.f)):
@@ -116,9 +116,8 @@ class Calculadora_TL():
               sigma = sigma_1[i]
               if sigma > 2: sigma = 2
               tau[i] = (2*rho_0*c/(2*np.pi*self.f[i]*m))**2 * np.pi*fc*sigma**2/(2*self.f[i]*n[i])
-        R = -10*np.log10(tau)
+        R = -10*np.log10(abs(tau))
         return R
-
 
             ###DAVY (ok)
     def davy(self,fc,m,nint,rho,E,sigma):

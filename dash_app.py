@@ -14,8 +14,10 @@ data = calculadora_tl.data
 available_indicators = data.material.unique()
 
 app.layout = html.Div([
-html.H1("Aislamiento de una pared monolítica", style={
-  'font-family': 'verdana', 'width':'75%', 'margin':50}),
+    html.Div([html.Img(src=app.get_asset_url('untref.png')),
+                html.H1("Aislamiento de una pared monolítica", style={
+    'font-family': 'verdana', 'width':'75%', 'margin':50})],
+        style={'display': 'inline-block'}),
     html.Div([
 
         html.Div([
@@ -87,17 +89,17 @@ def update_graph(material,alto,largo,espesor,metodos, xaxis_type):
     resultados = calculadora_tl.calcular_r(material, metodos)
     resultados['frecuencia'] = calculadora_tl.f
     colors = px.colors.qualitative.Plotly
-    resultados_df = pd.DataFrame(resultados)
     fig = go.Figure()
     # Edit the layout
     fig.update_layout(title='Aislamiento a ruido aéreo según distintos métodos',
                    xaxis_title='Frecuencia (Hz)',
                    yaxis_title='R (dB)')
     fig.update_xaxes(type='linear' if xaxis_type == 'Linear' else 'log')
+    names = {'ley1':'pared simple', 'sharp':'modelo Sharp', 'ISO':'ISO 12354-1', 'davy': 'modelo Davy'}
     for i, x in enumerate(metodos):
         fig.add_traces(go.Scatter(x=resultados['frecuencia'], y = resultados[x],
                                   mode = 'lines+markers', line=dict(color=colors[i]),
-                                  name=x))
+                                  name=names[x]))
     fig.show()
     return fig
 
