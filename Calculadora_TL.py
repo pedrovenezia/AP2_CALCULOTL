@@ -24,7 +24,7 @@ class Calculadora_TL():
 
     def load_data(self):
         '''Carga de datos'''
-        excel = pd.read_excel('/content/TABLA MATERIALES TP1.xlsx', header=None).drop(columns = [0, 1])[1::] #slide indexing 
+        excel = pd.read_excel('TABLA MATERIALES TP1.xlsx', header=None).drop(columns = [0, 1])[1::] #slide indexing 
         new_header = ['material', 'rho', 'E', 'nint', 'sigma']
         excel = excel[1:].reset_index(drop=True) #take the data less the header row
         excel.columns = new_header #set the header row as the df header
