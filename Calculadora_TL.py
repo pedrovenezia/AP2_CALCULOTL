@@ -69,11 +69,9 @@ class Calculadora_TL():
 
 # ISO 12354-1 OK!!!!
     def ISO(self,l1,l2, fc, m, nint):
-        c = 343
-        rho_0 = 1.18
         n = nint + m / (485*np.sqrt(self.f)) # Factor de pérdidas total
         # Factor de radiación de ondas forzadas
-        k = 2*np.pi*self.f / c   # Nro de onda
+        k = 2*np.pi*self.f / self.c   # Nro de onda
         h = 5*l2/(2*np.pi*l1) - 1/(4*np.pi*l1*l2*k**2)
         A = -0.964 - (0.5 + l2/(np.pi*l1))* np.log(l2/l1) + h
         sigma_f = 0.5*(np.log(k*np.sqrt(l1*l2)) - A)
@@ -82,40 +80,40 @@ class Calculadora_TL():
             sigma_f[i] = 2
         # Factor de radiación de ondas libres
         sigma_1 = 1/(np.sqrt(abs(1-fc/self.f)))
-        sigma_2 = 4*l1*l2*(self.f/c)**2
-        sigma_3 = np.sqrt(2*np.pi*self.f*(l1+l2)/(16*c))
+        sigma_2 = 4*l1*l2*(self.f/self.c)**2
+        sigma_3 = np.sqrt(2*np.pi*self.f*(l1+l2)/(16*self.c))
         # Modo de resonancia de placa 1,1
-        f11 = c**2/(4*fc)*(1/l1**2 + 1/l2**2)
+        f11 = self.c**2/(4*fc)*(1/l1**2 + 1/l2**2)
         tau =np.zeros(len(self.f))
         if f11 <= 0.5*fc:
-          for i in range(len(self.f)):
-            if self.f[i] >= fc:
-              sigma = sigma_1[i]
-              if sigma > 2: sigma = 2
-              tau[i] = (2*rho_0*c/(2*np.pi*self.f[i]*m))**2 * np.pi*fc*sigma**2/(2*self.f[i]*n[i])
-            if self.f[i] < fc:
-              lamda = np.sqrt(self.f[i]/fc)
-              if self.f[i] > 0.5*fc:
-                d2 = 0
-              else:
-                d2 = 8*c**2*(1-2*lamda**2) / (fc**2*np.pi**4*l1*l2*lamda*np.sqrt(1-lamda**2))
-              d1 = ((1-lamda**2)*np.log((1+lamda)/(1-lamda))+ 2*lamda) / (4*np.pi**2*(1-lamda**2)**1.5)
-              sigma = 2*(l1+l2)*c*d1/(l1*l2*fc)+d2
-              if (self.f[i] < f11) and (sigma > sigma_2[i]):
-                sigma = sigma_2[i]
-              if sigma > 2: sigma = 2
-              tau[i] = (2*rho_0*c/(2*np.pi*self.f[i]*m))**2 * (2*sigma_f[i] + (l1+l2)**2*np.sqrt(fc/self.f[i])*sigma**2/((l1**2+l2**2)*n[i])) 
+            for i in range(len(self.f)):
+                if self.f[i] >= fc:
+                    sigma = sigma_1[i]
+                    if sigma > 2: sigma = 2
+                    tau[i] = (2*self.rho_0*self.c/(2*np.pi*self.f[i]*m))**2 * np.pi*fc*sigma**2/(2*self.f[i]*n[i])
+                if self.f[i] < fc:
+                    lamda = np.sqrt(self.f[i]/fc)
+                if self.f[i] > 0.5*fc:
+                    d2 = 0
+                else:
+                    d2 = 8*self.c**2*(1-2*lamda**2) / (fc**2*np.pi**4*l1*l2*lamda*np.sqrt(1-lamda**2))
+                d1 = ((1-lamda**2)*np.log((1+lamda)/(1-lamda))+ 2*lamda) / (4*np.pi**2*(1-lamda**2)**1.5)
+                sigma = 2*(l1+l2)*self.c*d1/(l1*l2*fc)+d2
+                if (self.f[i] < f11) and (sigma > sigma_2[i]):
+                    sigma = sigma_2[i]
+                if sigma > 2: sigma = 2
+                tau[i] = (2*self.rho_0*self.c/(2*np.pi*self.f[i]*m))**2 * (2*sigma_f[i] + (l1+l2)**2*np.sqrt(fc/self.f[i])*sigma**2/((l1**2+l2**2)*n[i])) 
         else:
-          for i in range(len(self.f)):
-            sigma = sigma_3[i]
-            if (self.f[i] < fc) and (sigma_2[i] < sigma):
-              sigma = sigma_2[i]
-              if sigma > 2: sigma = 2
-              tau[i] = (2*rho_0*c/(2*np.pi*self.f[i]*m))**2 * (2*sigma_f[i] + (l1+l2)**2*np.sqrt(fc/self.f[i])*sigma**2/((l1**2+l2**2)*n[i]))
-            if (self.f[i] >= fc) and (sigma_1[i] < sigma):
-              sigma = sigma_1[i]
-              if sigma > 2: sigma = 2
-              tau[i] = (2*rho_0*c/(2*np.pi*self.f[i]*m))**2 * np.pi*fc*sigma**2/(2*self.f[i]*n[i])
+            for i in range(len(self.f)):
+                sigma = sigma_3[i]
+                if (self.f[i] < fc) and (sigma_2[i] < sigma):
+                    sigma = sigma_2[i]
+                if sigma > 2: sigma = 2
+                tau[i] = (2*self.rho_0*self.c/(2*np.pi*self.f[i]*m))**2 * (2*sigma_f[i] + (l1+l2)**2*np.sqrt(fc/self.f[i])*sigma**2/((l1**2+l2**2)*n[i]))
+                if (self.f[i] >= fc) and (sigma_1[i] < sigma):
+                    sigma = sigma_1[i]
+                if sigma > 2: sigma = 2
+                tau[i] = (2*self.rho_0*self.c/(2*np.pi*self.f[i]*m))**2 * np.pi*fc*sigma**2/(2*self.f[i]*n[i])
         R = -10*np.log10(abs(tau))
         return R
 
@@ -257,3 +255,8 @@ class Calculadora_TL():
                 funcion = self._llama_metodo(x)
                 results[x] = funcion(fc, m, nint, rho, E, sigma)
         return results 
+
+if __name__ == '__main__':
+    a = Calculadora_TL(data_path='TABLA MATERIALES TP1.xlsx', t=0.52, l1=3, l2=5)
+    resultados = a.calcular_r('Hormigón', ['ley1', 'sharp', 'davy', 'ISO'])
+    print(resultados)
