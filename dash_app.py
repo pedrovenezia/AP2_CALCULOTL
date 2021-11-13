@@ -8,7 +8,7 @@ import pandas as pd
 from Calculadora_TL import Calculadora_TL
 
 app = dash.Dash(__name__)
-app.title = 'Software para el cálculo de TL'
+app.title = 'a ver'
 server = app.server
 calculadora_tl = Calculadora_TL('TABLA MATERIALES TP1.xlsx')
 data = calculadora_tl.data
