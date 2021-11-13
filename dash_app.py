@@ -8,7 +8,7 @@ import pandas as pd
 from Calculadora_TL import Calculadora_TL
 
 app = dash.Dash(__name__)
-app.title = 'Software para el cálculo de TL'
+app.title = 'Cálculo del indice de transmision sonora aparante'
 server = app.server
 calculadora_tl = Calculadora_TL('TABLA MATERIALES TP1.xlsx')
 data = calculadora_tl.data
@@ -17,7 +17,7 @@ available_indicators = data.material.unique()
 app.layout = html.Div([
 
     html.Div([html.Img(src=app.get_asset_url('untref.png'), style={'margin': 'auto'}),
-              html.H1("Aislamiento de una pared monolítica", style={'float':'right',
+              html.H1("Aislamiento de una pared simple", style={'float':'right',
                 'font-family': 'verdana', 'width':'50%'})],
                 style={'vertical-align': 'top'}),
 
